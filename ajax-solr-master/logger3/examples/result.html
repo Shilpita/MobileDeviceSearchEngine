@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Phone Search</title>
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css">
+  </head>
+
+  <body>
+<div id="container"></div>
+<div id="containerlink"></div>
+
+<script>
+$(function() {
+
+var counterQuery=  parseInt(sessionStorage.getItem('CounterForQuery')) + 0; 
+var obj = "{";
+
+var UserName=sessionStorage.getItem("UserName");
+
+obj+="\"UserName\":\""+UserName+"\",";
+
+
+var UserSessionStartTime=sessionStorage.getItem("UserSessionStartTime");
+
+
+obj+="\"UserSessionStartTime\":\""+JSON.parse(UserSessionStartTime)+"\",";
+
+var SearchEngineSystem =sessionStorage.getItem("SearchEngineSystem");
+obj+="\"SearchEngineSystem\":\""+SearchEngineSystem+"\",";
+
+var allFacets=0;
+
+if(SearchEngineSystem=="advanced"){
+  for(i=1;i<=counterQuery;i++){
+    var labelFacetResult="Query"+i+"Facet";
+
+var FacetResultValue= sessionStorage.getItem(labelFacetResult);
+var ArrayFacetResultValue=JSON.parse(sessionStorage.getItem(labelFacetResult));
+var LengthArrayFacetResultValue=ArrayFacetResultValue.length+0;
+allFacets+=LengthArrayFacetResultValue;
+ 
+ obj+="\""+labelFacetResult+"\":"+FacetResultValue+",";
+
+   obj+="\"Total"+labelFacetResult+"\":"+LengthArrayFacetResultValue+",";
+
+
+
+  }
+
+obj+="\"TotalNoOfFacetsInSession\":"+allFacets+",";
+
+}
+
+var allClicks=0;
+var allRelevant=0;
+var allSatisfied=0;
+
+for(i=1;i<=counterQuery;i++){
+var Query="Query"+i;
+var Querytimestamp="Querytimestamp"+i;
+var QueryResultClicks=Query+"ResultsClicked";
+var TotalQueryResultClicks="Total"+Query+"ResultsClicked";
+var labelRelevantResult="Query"+i+"MarkedAsRelevant";
+var labelSatisfiedResult="Query"+i+"MarkedAsSatisfied";
+
+
+
+var QueryValue=	sessionStorage.getItem(Query);
+var QuerytimestampValue=sessionStorage.getItem(Querytimestamp);
+var QueryResultClicksValue=	sessionStorage.getItem(QueryResultClicks);
+
+var TotalQueryResultClicksValue= parseInt(sessionStorage.getItem(TotalQueryResultClicks))+0;
+var RelevantResultValue=sessionStorage.getItem(labelRelevantResult);
+
+var SatisfiedResultValue=sessionStorage.getItem(labelSatisfiedResult);
+
+var ArrayRelevantResultValue=JSON.parse(sessionStorage.getItem(labelRelevantResult));
+var LengthArrayRelevantResultValue=ArrayRelevantResultValue.length+0;
+allRelevant+=LengthArrayRelevantResultValue;
+
+
+var ArraySatisfiedResultValue=JSON.parse(sessionStorage.getItem(labelSatisfiedResult));
+var LengthArraySatisfiedResultValue=ArraySatisfiedResultValue.length+0;
+allSatisfied+=LengthArraySatisfiedResultValue;
+
+
+
+obj+="\""+Query+"\":\""+QueryValue+"\",";
+obj+="\""+Querytimestamp+"\":\""+JSON.parse(QuerytimestampValue)+"\",";
+
+obj+="\""+TotalQueryResultClicks+"\":"+TotalQueryResultClicksValue+",";
+
+
+	obj+="\""+labelRelevantResult+"\":"+RelevantResultValue+",";
+
+   obj+="\""+labelSatisfiedResult+"\":"+SatisfiedResultValue+",";
+
+   obj+="\"Total"+labelRelevantResult+"\":"+LengthArrayRelevantResultValue+",";
+
+    obj+="\"Total"+labelSatisfiedResult+"\":"+LengthArraySatisfiedResultValue+",";
+
+
+
+allClicks+=TotalQueryResultClicksValue;
+
+
+
+}
+
+
+obj+="\"TotalNoOfQueries\":"+counterQuery+",";
+
+obj+="\"TotalNoOfClicksInSession\":"+allClicks+",";
+
+obj+="\"TotalNoOfSatisfiedInSession\":"+allSatisfied+",";
+obj+="\"TotalNoOfRelevantInSession\":"+allRelevant;
+
+obj+=  "}";
+
+
+console.log(obj);
+sessionStorage.clear();
+
+var data = "text/json;charset=utf-8," + encodeURIComponent(obj);
+
+$('<a href="data:' + data + '" download="data.json">download JSON</a>').appendTo('#containerlink');
+document.getElementById("container").innerHTML = obj;
+});
+</script>
+
+  </body>
+  
+  </html>

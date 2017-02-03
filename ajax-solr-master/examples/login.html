@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+ </head>
+<script>
+function basic(){
+  var  nameIs=document.getElementById('UserName').value;
+ 
+sessionStorage.setItem("UserName", nameIs);
+var timestamp = new Date();
+sessionStorage.setItem("UserSessionStartTime",JSON.stringify(timestamp));
+sessionStorage.setItem("CounterForQuery",0);
+sessionStorage.setItem("SearchEngineSystem","basic");
+
+console.log(timestamp);
+//self.location.href = "/coen272_basic/index.html";
+};
+function advanced(){
+ var  nameIs=document.getElementById('UserName').value;
+sessionStorage.setItem("UserName", nameIs);
+var timestamp =  new Date();
+
+sessionStorage.setItem("UserSessionStartTime",JSON.stringify(timestamp));
+sessionStorage.setItem("CounterForQuery",0);
+sessionStorage.setItem("SearchEngineSystem","advanced");
+};
+
+</script>
+  <body>
+
+    <div class="container" >
+
+      <form action="/solr/ajax-solr-master/examples/coen272_basic/index.html">
+        <h2 class="form-signin-heading">Please Enter Name</h2>
+        <label for="inputEmail" class="sr-only">User Name</label>
+        <input type="text" id="UserName" class="form-control" placeholder="UserName">
+      <br>
+      <br>
+      <br>
+        <button id="basicButton" class="btn btn-lg btn-primary btn-block" onClick="javascript:basic()">Basic Browser </button>
+      
+      
+      </form>
+
+
+ <form action="/solr/ajax-solr-master/examples/coen272_advanced/index.html">
+    <button id="avdancedButton" class="btn btn-lg btn-primary btn-block" onclick="advanced()"> Advanced Browser</button>
+
+ </form>
+    </div> <!-- /container -->
+
+
+  </body>
+</html>
+

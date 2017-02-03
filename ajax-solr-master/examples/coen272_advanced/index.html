@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Phone Search</title>
+  <link rel="stylesheet" href="css/phones.css">
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css">
+  <script src="js/phones.js"></script>
+  <script src="../../core/Core.js"></script>
+  <script src="../../core/AbstractManager.js"></script>
+  <script src="../../managers/Manager.jquery.js"></script>
+  <script src="../../core/Parameter.js"></script>
+  <script src="../../core/ParameterStore.js"></script>
+  <script src="../../core/ParameterHashStore.js"></script>
+  <script src="../../core/AbstractWidget.js"></script>
+  <script src="../../widgets/jquery/PagerWidget.js"></script>
+  <script src="../../core/AbstractFacetWidget.js"></script>
+  <script src="../../core/AbstractTextWidget.js"></script>
+  <script src="widgets/ResultWidget.js"></script>
+  <script src="widgets/TextWidget.js"></script>
+  <script src="widgets/MultiSelectWidget.js"></script>
+  <script src="widgets/CurrentSearchWidget.js"></script>
+</head>
+<body>
+  <div id="wrap">
+  
+    <div id="header">
+      <h1>Search Phones</h1>
+           <div class="right">
+      <a href='/solr/ajax-solr-master/examples/result.html' style={float:right;}>Finish task</a>
+    </div>
+    </div>
+
+    <div class="right">
+      <div id="result">
+        <div id="navigation">
+          <ul id="pager"></ul>
+          <div id="pager-header"></div>
+        </div>
+        <div id="docs"></div>
+      </div>
+    </div>
+
+    <div class="left">
+      <h2>Current Selection</h2>
+      <ul id="selection"></ul>
+
+      <h2>Search</h2>
+      <ul id="search">
+        <input type="text" id="query" name="query" autocomplete="off">
+      </ul>
+
+      <h2>Brand</h2>
+      <div class="tagcloud" id="brands"></div>
+
+	  <h2>Price</h2>
+	  <div class="tagcloud" id="price"></div>
+
+	  <h2>Display Size</h2>
+	  <div class="tagcloud" id="display"></div>
+	  
+	  <h2>Memory (RAM)</h2>
+	  <div class="tagcloud" id="memory"></div>
+
+      <h2>Camera</h2>
+      <div class="tagcloud" id="cameras"></div>
+
+      <div class="clear"></div>
+    </div>
+    <div class="clear"></div>
+  </div>
+<script>
+$(function(){
+
+$('body').on('click', 'a#specialLink', function() {
+    // do something
+     console.log(($(this).attr('href')));
+      console.log($(this).text());
+      var url=($(this).attr('href'));
+      var title= $(this).text();
+       var timestamp = new Date();
+      var counterQuery=  parseInt(sessionStorage.getItem('CounterForQuery')) + 0; 
+
+      var labelOfResult="Query"+counterQuery+"ResultsClicked";
+      var labelTotalCounter="Total"+"Query"+counterQuery+"ResultsClicked";
+       var totalCounter=  parseInt(sessionStorage.getItem(labelTotalCounter)) + 1; 
+        sessionStorage.setItem(labelTotalCounter,totalCounter);
+
+
+      var resultsArray=JSON.parse(sessionStorage.getItem(labelOfResult));
+     
+          resultsArray.push({
+        "title": title,
+        "url": url,
+        "timestamp": timestamp
+    });
+
+
+           sessionStorage.setItem(labelOfResult,JSON.stringify(resultsArray));
+     
+});
+
+$('body').on('click', 'input[type="checkbox"].rs', function() {
+/*
+    alert($(this).attr('value'));
+    alert($(this).attr('data-checkbox-text'));
+     alert($(this).attr('data-checkbox-text-position'));
+*/
+
+      var counterQueryCheckBox=  parseInt(sessionStorage.getItem('CounterForQuery')) + 0; 
+
+      var labelRelevantResult="Query"+counterQueryCheckBox+"MarkedAsRelevant";
+        var labelSatisfiedResult="Query"+counterQueryCheckBox+"MarkedAsSatisfied";
+
+      var resultRelevant = JSON.parse(sessionStorage.getItem(labelRelevantResult));
+
+      var resultSatisfied = JSON.parse(sessionStorage.getItem(labelSatisfiedResult));
+
+
+
+var positionValue = $(this).attr('data-checkbox-text-position');
+var urlValue=$(this).attr('data-checkbox-text');
+
+if($(this).attr('value')=='Relevant'){
+if(resultRelevant==null){
+
+ resultRelevant.push({
+        "position":positionValue ,
+        "url": urlValue
+        
+});
+
+
+
+}//if of null ends
+else{
+
+var resultR = $.grep(resultRelevant, function(e){ return e.position ==  positionValue; });
+
+//alert("Result grep Length"+resultR.length);
+
+    if(resultR.length != 0){
+
+      resultRelevant = resultRelevant
+                .filter(function (el) {
+                 // alert("Position of filtering"+el.position);
+                      return el.position != positionValue;
+                 }
+);
+
+    }//position check if ends
+    else{
+ resultRelevant.push({
+        "position": positionValue,
+        "url": urlValue
+});
+
+
+    }//position check else ends
+
+
+}//else of null ends
+
+sessionStorage.setItem(labelRelevantResult,JSON.stringify(resultRelevant));
+}//if end
+
+
+
+
+if($(this).attr('value')=='Satisfied'){
+if(resultSatisfied==null){
+
+ resultSatisfied.push({
+        "position":positionValue ,
+        "url": urlValue
+        
+});
+
+
+
+}//if of null ends
+else{
+
+var resultR = $.grep(resultSatisfied, function(e){ return e.position ==  positionValue; });
+
+//alert("Result grep Length"+resultR.length);
+
+    if(resultR.length != 0){
+
+      resultSatisfied = resultSatisfied
+                .filter(function (el) {
+                //  alert("Position of filtering"+el.position);
+                      return el.position != positionValue;
+                 }
+);
+
+    }//position check if ends
+    else{
+ resultSatisfied.push({
+        "position":  positionValue,
+        "url": urlValue});
+
+
+    }//position check else ends
+
+
+}//else of null ends
+
+sessionStorage.setItem(labelSatisfiedResult,JSON.stringify(resultSatisfied));
+}//if end
+
+
+
+
+
+});
+
+
+
+
+$('body').on('click', 'input[type="checkbox"].facetclass', function() {
+
+
+//alert("hi");
+
+
+
+      var counterQueryCheckBox=  parseInt(sessionStorage.getItem('CounterForQuery')) + 0; 
+
+      var labelFacetResult="Query"+counterQueryCheckBox+"Facet";
+       
+
+      var resultFacetResult = JSON.parse(sessionStorage.getItem(labelFacetResult));
+
+     
+
+
+
+var facetValue = $(this).attr('value');
+
+
+
+if(resultFacetResult==null){
+resultFacetResult=[];
+ resultFacetResult.push({
+        "facet":facetValue 
+});
+
+
+
+}//if of null ends
+else{
+
+var resultR = $.grep(resultFacetResult, function(e){ return e.facet ==  facetValue; });
+
+//alert("Result grep Length"+resultR.length);
+
+    if(resultR.length != 0){
+
+      resultFacetResult = resultFacetResult
+                .filter(function (el) {
+                 // alert("Position of filtering"+el.position);
+                      return el.facet != facetValue;
+                 }
+);
+
+    }//position check if ends
+    else{
+ resultFacetResult.push({
+        "facet": facetValue
+       
+});
+
+
+    }//position check else ends
+
+
+}//else of null ends
+
+sessionStorage.setItem(labelFacetResult,JSON.stringify(resultFacetResult));
+
+
+
+
+});//end of facetclass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+});
+
+</script>
+</body>
+</html>

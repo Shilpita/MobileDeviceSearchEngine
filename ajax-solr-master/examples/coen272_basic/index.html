@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Phone Search</title>
+  <link rel="stylesheet" href="css/phones.css">
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css">
+  <script src="js/phones.js"></script>
+  <script src="../../core/Core.js"></script>
+  <script src="../../core/AbstractManager.js"></script>
+  <script src="../../managers/Manager.jquery.js"></script>
+  <script src="../../core/Parameter.js"></script>
+  <script src="../../core/ParameterStore.js"></script>
+  <script src="../../core/AbstractWidget.js"></script>
+  <script src="../../widgets/jquery/PagerWidget.js"></script>
+  <script src="../../core/AbstractFacetWidget.js"></script>
+  <script src="../../core/AbstractTextWidget.js"></script>
+  <script src="widgets/ResultWidget.js"></script>
+  <script src="widgets/TextWidget.js"></script>
+
+
+
+
+
+</head>
+<body>
+  <div id="wrap">
+    <div id="header">
+      <h1>Search Phones</h1>
+     <div class="right">
+      <a href='/solr/ajax-solr-master/examples/result.html' style={float:right;}>Finished Task</a>
+    </div>
+    </div>
+
+    <div class="right">
+      <div id="result">
+        <div id="navigation">
+          <ul id="pager"></ul>
+          <div id="pager-header"></div>
+        </div>
+        <div id="docs"></div>
+      </div>
+    </div>
+
+    <div class="left">
+      <h2>Current Selection</h2>
+      <ul id="selection"></ul>
+
+      <h2>Search</h2>
+      <ul id="search">
+        <input type="text" id="query" name="query" autocomplete="off">
+      </ul>
+<a id="specialLink"></a>
+      <div class="clear"></div>
+    </div>
+    <div class="clear"></div>
+  </div>
+<script>
+$(function(){
+$('body').on('click', 'a#specialLink', function() {
+    // do something
+     console.log(($(this).attr('href')));
+      console.log($(this).text());
+      var url=($(this).attr('href'));
+      var title= $(this).text();
+       var timestamp = new Date();
+      var counterQuery=  parseInt(sessionStorage.getItem('CounterForQuery')) + 0; 
+
+      var labelOfResult="Query"+counterQuery+"ResultsClicked";
+      var labelTotalCounter="Total"+"Query"+counterQuery+"ResultsClicked";
+       var totalCounter=  parseInt(sessionStorage.getItem(labelTotalCounter)) + 1; 
+        sessionStorage.setItem(labelTotalCounter,totalCounter);
+
+
+      var resultsArray=JSON.parse(sessionStorage.getItem(labelOfResult));
+     
+          resultsArray.push({
+        "title": title,
+        "url": url,
+        "timestamp": timestamp
+    });
+
+
+           sessionStorage.setItem(labelOfResult,JSON.stringify(resultsArray));
+     
+});
+
+$('body').on('click', 'input[type="checkbox"].rs', function() {
+/*
+    alert($(this).attr('value'));
+    alert($(this).attr('data-checkbox-text'));
+     alert($(this).attr('data-checkbox-text-position'));
+*/
+
+      var counterQueryCheckBox=  parseInt(sessionStorage.getItem('CounterForQuery')) + 0; 
+
+      var labelRelevantResult="Query"+counterQueryCheckBox+"MarkedAsRelevant";
+        var labelSatisfiedResult="Query"+counterQueryCheckBox+"MarkedAsSatisfied";
+
+      var resultRelevant = JSON.parse(sessionStorage.getItem(labelRelevantResult));
+
+      var resultSatisfied = JSON.parse(sessionStorage.getItem(labelSatisfiedResult));
+
+
+
+var positionValue = $(this).attr('data-checkbox-text-position');
+var urlValue=$(this).attr('data-checkbox-text');
+
+if($(this).attr('value')=='Relevant'){
+if(resultRelevant==null){
+
+ resultRelevant.push({
+        "position":positionValue ,
+        "url": urlValue
+        
+});
+
+
+
+}//if of null ends
+else{
+
+var resultR = $.grep(resultRelevant, function(e){ return e.position ==  positionValue; });
+
+//alert("Result grep Length"+resultR.length);
+
+    if(resultR.length != 0){
+
+      resultRelevant = resultRelevant
+                .filter(function (el) {
+                 // alert("Position of filtering"+el.position);
+                      return el.position != positionValue;
+                 }
+);
+
+    }//position check if ends
+    else{
+ resultRelevant.push({
+        "position": positionValue,
+        "url": urlValue
+});
+
+
+    }//position check else ends
+
+
+}//else of null ends
+
+sessionStorage.setItem(labelRelevantResult,JSON.stringify(resultRelevant));
+}//if end
+
+
+
+
+if($(this).attr('value')=='Satisfied'){
+if(resultSatisfied==null){
+
+ resultSatisfied.push({
+        "position":positionValue ,
+        "url": urlValue
+        
+});
+
+
+
+}//if of null ends
+else{
+
+var resultR = $.grep(resultSatisfied, function(e){ return e.position ==  positionValue; });
+
+//alert("Result grep Length"+resultR.length);
+
+    if(resultR.length != 0){
+
+      resultSatisfied = resultSatisfied
+                .filter(function (el) {
+                //  alert("Position of filtering"+el.position);
+                      return el.position != positionValue;
+                 }
+);
+
+    }//position check if ends
+    else{
+ resultSatisfied.push({
+        "position":  positionValue,
+        "url": urlValue});
+
+
+    }//position check else ends
+
+
+}//else of null ends
+
+sessionStorage.setItem(labelSatisfiedResult,JSON.stringify(resultSatisfied));
+}//if end
+
+
+
+
+
+});
+});
+
+</script>
+</body>
+</html>
